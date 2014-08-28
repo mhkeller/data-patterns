@@ -451,5 +451,5 @@ function bakeGraphs(){
 ````
 
 
-
+A library for scales without D3: https://gist.github.com/aubergene/7791133
 

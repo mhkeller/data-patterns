@@ -4,21 +4,21 @@ var country_counts;
 
 queue()
 	.defer(d3.csv, '../data/ebola.csv')
-	.defer(d3.json, '../data/africa.topojson')
-	.await(function(err, ebola, africa){
+	.await(function(err, ebola){
 		country_counts = transformData(ebola);
 		var min_count = 1; // Always set the min to one
 		// Calculate the max through an accessor function
 		var max_count = d3.max(country_counts, function(countryCounts) { return countryCounts.values.total_cases; });
 		console.log(max_count)
-		cases_scale.domain([min_count, max_count])
-							 .range([0,100]); // Make the output between zero and one so we can use this as a percentage.
+
+		cases_scale.domain([1, max_count])
+							 .range([0,1]); // Make the output between zero and one so we can use this as a percentage.
 
 		bakeGraphs();
 	});
 
 function transformData(ebolaData){
-	return d3.nest()
+	var ebola_nested = d3.nest()
 		.key(function(d){ return d.country_name })
 		.rollup(function(values){
 			var totals_object = {
@@ -28,12 +28,17 @@ function transformData(ebolaData){
 			return totals_object;
 		})
 		.entries(ebolaData);
+
+	return ebola_nested;
 }
 
 function bakeGraphs(){
-	var body = d3.select('#wrapper')
+
+	var body = d3.select('#wrapper');
+
 	body.selectAll('.country-bar').data(country_counts).enter()
 		.append('div')
 			.classed('country-bar', true)
-			.style('width', function(d) { return cases_scale(d.values.total_cases) + 'px' })
+			.style('width', function(d) { return cases_scale(d.values.total_cases)*100 + '%' })
+
 }
